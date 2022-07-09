@@ -1,0 +1,122 @@
+
+If our goal is to scale, how do we measure this?
+
+What is our current pace of producing SDKs?
+
+Can we get historical data, by month or quarter:
+- Total number of Azure services
+- Number of Azure services with an SDK (of any flavor)
+- Number of Azure services with a Track 2 SDK
+
+This won't capture work to maintain / update existing SDKs after their initial release, but maybe that's okay.
+
+We have data in the azure-sdk repo.
+
+[mikekistler@Mikes-MacBook-Pro] ~/Projects/Azure/azure-sdk (main)>find . -name '*.csv'
+./_data/releases/latest/ios-packages.csv
+./_data/releases/latest/go-packages.csv
+./_data/releases/latest/dotnet-packages.csv
+./_data/releases/latest/java-packages.csv
+./_data/releases/latest/js-packages.csv
+./_data/releases/latest/python-packages.csv
+./_data/releases/latest/android-packages.csv
+./_data/releases/latest/c-packages.csv
+./_data/releases/latest/cpp-packages.csv
+[mikekistler@Mikes-MacBook-Pro] ~/Projects/Azure/azure-sdk (main)>
+
+"Package","VersionGA","VersionPreview","DisplayName","ServiceName","RepoPath","MSDocs","GHDocs","Type","New","PlannedVersions","FirstGADate","Support","DeprecatedDate","Hide","Replace","ReplaceGuide","MSDocService","Notes"
+
+"Type":
+  dotnet: {'', 'mgmt', 'client', 'compat'}
+  java: {'', 'spring', 'mgmt', 'client'}
+
+Assumption: Only Track2 libraries will have a "FirstGADate"
+
+Maybe "support" == "active" means Track2
+
+=====================
+
+https://msit.powerbi.com/groups/3e17dcb0-4257-4a30-b843-77f47f1d4121/reports/198634d5-4624-4b8b-8eea-d4d754f441a2/ReportSection?ctid=72f988bf-86f1-41af-91ab-2d7cd011db47
+
+
+=====================
+
+www.nuget.org
+
+Search on azure - 6,111 packages
+
+Filter button - not helpful
+
+Search on azure-sdk - 434 packages
+
+=====================
+
+Azure-rest-api-specs
+
+>find specification/*/resource-manager -name 'readme.md' | wc -l
+     233
+
+>find specification/*/data-plane -name 'readme.md' | wc -l
+      95
+=====================
+
+git checkout `git rev-list -n 1 --before="2022-04-01 00:00" main`
+
+=====================
+
+# Some dirty data for dotnet - Six rows with the wrong # of columns
+
+>>> lang = 'dotnet'
+>>> lang_packages = numpy.genfromtxt(f'{lang}-packages.csv', delimiter=',', dtype=None, encoding=None, skip_header=1)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/opt/homebrew/lib/python3.9/site-packages/numpy/lib/npyio.py", line 2124, in genfromtxt
+    raise ValueError(errmsg)
+ValueError: Some errors were detected !
+    Line #14 (got 20 columns instead of 19)
+    Line #30 (got 20 columns instead of 19)
+    Line #31 (got 20 columns instead of 19)
+    Line #360 (got 21 columns instead of 19)
+    Line #361 (got 21 columns instead of 19)
+    Line #363 (got 21 columns instead of 19
+
+>>> len(lang_packages[0])
+19
+
+# Should be only 19 columns
+
+BAD DATA
+
+>awk -F',' 'NF != 19{print}' dotnet-packages.csv
+"Azure.Search.Documents","11.3.0","11.4.0-beta.7","Cognitive Search","Search","search","","","client","true","11.4.0-beta.8,07/07/2022","07/07/2020","active","","","Microsoft.Azure.Search","","",""
+"Azure.Messaging.EventHubs","5.7.0","","Event Hubs","Event Hubs","eventhub","","","client","true","5.7.1,07/05/2022","05/02/2020","active","","","Microsoft.Azure.EventHubs","","",""
+"Azure.Messaging.EventHubs.Processor","5.7.0","","Event Hubs - Event Processor","Event Hubs","eventhub","","","client","true","5.7.1,07/05/2022","05/05/2020","active","","","Microsoft.Azure.EventHubs.Processor","","",""
+"Microsoft.Azure.KeyVault","3.0.5","","Key Vault","Key Vault","keyvault","NA","","client","False","","","deprecated","3/31/2023","","Azure.Security.KeyVault.Certificates,Azure.Security.KeyVault.Keys,Azure.Security.KeyVault.Secrets","https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/Azure.Security.KeyVault.Secrets/MigrationGuide.md","",""
+"Microsoft.Azure.KeyVault.Core","3.0.5","","Key Vault - Core","Storage","keyvault","NA","NA","client","False","","","maintenance","","","Azure.Security.KeyVault.Keys, Azure.Security.KeyVault.Secrets, Azure.Security.KeyVault.Certificates","","",""
+"Microsoft.Azure.KeyVault.Extensions","3.0.5","","Key Vault - Extensions","Key Vault","keyvault","NA","NA","client","False","","","deprecated","3/31/2023","","Azure.Security.KeyVault.Certificates,Azure.Security.KeyVault.Keys,Azure.Security.KeyVault.Secrets","https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/Azure.Security.KeyVault.Secrets/MigrationGuide.md","",""
+
+>awk -F',' 'NF != 19{print}' python-packages.csv
+"azure-identity","1.10.0","1.11.0b1","Identity","Identity","identity","","","client","true","1.11.0b2,07/05/2022","10/29/2019","active","","","","","",""
+"azure-servicebus","7.7.0","","Service Bus","Service Bus","servicebus","","","client","true","7.8.0,07/05/2022","11/24/2020","active","","","","https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/servicebus/azure-servicebus/migration_guide.md","",""
+"microsoft-opentelemetry-exporter-azuremonitor","","1.0.0b1","Monitor Exporter for OpenTelemetry","Monitor","monitor","NA","","client","true","1.0.0,04/13/2021","","preview","","true","","","",""
+
+> >awk -F',' 'NF != 20{print}' java-packages.csv
+"azure-mixedreality-authentication","com.azure","1.2.3","","Azure Mixed Reality Authentication","Mixed Reality","mixedreality","","","client","true","1.2.4,07/05/2022","02/26/2021","active","","","","","",""
+"azure-communication-common","com.azure","1.1.4","","Communication Common","Communication","communication","","","client","true","1.1.5,07/05/2022","03/29/2021","active","","","","","",""
+"azure-communication-identity","com.azure","1.1.10","1.2.0-beta.1","Communication Identity","Communication","communication","","","client","true","1.1.11,07/05/2022","03/29/2021","active","","","","","",""
+"azure-identity","com.azure","1.5.2","","Identity","Identity","identity","","","client","true","1.5.3,07/05/2022","10/29/2019","active","","","","","",""
+"azure-messaging-webpubsub","com.azure","1.1.3","","Web PubSub","Web PubSub","webpubsub","","","client","true","1.1.4,07/05/2022","11/23/2021","","","","","","",""
+"azure-keyvault","com.microsoft.azure","1.2.6","","Key Vault","Key Vault","https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/keyvault/microsoft-azure-keyvault","NA","","client","false","","","deprecated","3/31/2023","true","com.azure/azure-security-keyvault-certificates,com.azure/azure-security-keyvault-secrets,com.azure/azure-security-keyvault-certificates,com.azure/azure-security-keyvault-key","","",""
+"azure-keyvault-webkey","com.microsoft.azure","1.2.6","","Key Vault - Webkey","Key Vault","https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/keyvault/microsoft-azure-keyvault-webkey","NA","","client","false","","","deprecated","3/31/2023","true","com.azure/azure-security-keyvault-secrets,com.azure/azure-security-keyvault-certificates,com.azure/azure-security-keyvault-key","","",""
+"azure-spring-boot-starter-active-directory","com.microsoft.azure","3.0.0","","azure-spring-boot-starter-active-directory","Spring Boot","spring","NA","NA","spring","false","","","","","true","","","","Publish to Maven by mistakes, deprecated now"
+
+>awk -F',' 'NF != 19{print}' js-packages.csv
+"@azure/keyvault-admin","4.2.0","","Administration","Key Vault","keyvault","","","client","true","4.2.1,07/05/2022","06/15/2021","","","","","","",""
+"@azure/keyvault-certificates","4.4.0","","Certificates","Key Vault","keyvault","","","client","true","4.5.0-beta.1,07/05/2022","01/07/2020","active","","","","","",""
+"@azure/keyvault-keys","4.4.0","","Keys","Key Vault","keyvault","","","client","true","4.5.0-beta.1,07/05/2022","10/30/2019","active","","","","","",""
+"@azure/keyvault-secrets","4.4.0","","Secrets","Key Vault","keyvault","","","client","true","4.5.0-beta.1,07/05/2022","10/30/2019","active","","","","","",""
+"@azure/event-processor-host","2.1.1","","Event Processor","Event Hubs","eventhub","NA","","client","false","","","deprecated","3/31/2023","","@azure/event-hubs, @azure/eventhubs-checkpointstore-blob","","",""
+"azure-storage","2.10.3","","Storage","Storage","NA","NA","NA","client","false","","","deprecated","3/31/2023","","@azure/storage-blob,@azure/storage-queue,@azure/storage-file-share,@azure/data-tables","","",""
+
+
+
