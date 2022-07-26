@@ -41,9 +41,9 @@ plt.title('Data Plane Service Versions')
 # plot preview services as dashed line
 plt.plot(quarters, [None]+[int(x[3])+int(x[4]) for x in services[2:]], linestyle='--')
 plt.plot(quarters, [None]+[int(x[3]) for x in services[2:]])
-plt.plot(quarters, [None]+moving_average([int(x[3])+int(x[4]) for x in services[2:]], 4))
+#plt.plot(quarters, [None]+moving_average([int(x[3])+int(x[4]) for x in services[2:]], 4))
 
-plt.legend(['services - preview', 'services - ga', 'ga+preview - 4 quarter moving avg'])
+plt.legend(['services - preview', 'services - ga']) #, 'ga+preview - 4 quarter moving avg'])
 # Make the labels compact
 qlabels = [qlabel(x) for x in quarters]
 plt.xticks(quarters, qlabels)

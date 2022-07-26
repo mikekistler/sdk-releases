@@ -11,14 +11,17 @@ import os
 today = datetime.today().strftime('%Y-%m-%d')
 quarters = [v for v in [f'{y}-{q}' for y in range(2017, 2023) for q in ['03-31', '06-30', '09-30', '12-31']] if v < today]
 
-def count_new(last_quarter, this_quarter):
-    return len ([x for x in this_quarter if x not in last_quarter])
+def count_new(this_quarter, last_quarter):
+    qservices = [x for x in this_quarter if x not in last_quarter]
+    # Use set comprehension to get the number of new services (ignore multiple versions in one quarter)
+    return len ({'/'.join(x.split('/')[:-2]) for x in qservices})
 
 # Pull in the latest version of the Azure API docs (NO shallow clone)
 # os.system('rm -rf azure-rest-api-specs')
 # os.system('git clone https://github.com/Azure/azure-rest-api-specs.git')
 os.chdir('azure-rest-api-specs')
 
+# last_quarter_services is all service versions released before the end of the last quarter
 last_quarter_services = None
 print('Quarter, MgmtPlaneGA, MgmtPlanePreview, DataPlaneGA, DataPlanePreview')
 for quarter in quarters:
@@ -28,6 +31,6 @@ for quarter in quarters:
         for type in ['stable', 'preview']:
             this_quarter_services[plane][type] = glob.glob(f'specification/*/{plane}/**/{type}/*', recursive=True)
     if last_quarter_services:
-        counts = [count_new(last_quarter_services[plane][type], this_quarter_services[plane][type]) for plane in ['resource-manager', 'data-plane'] for type in ['stable', 'preview']]
+        counts = [count_new(this_quarter_services[plane][type], last_quarter_services[plane][type]) for plane in ['resource-manager', 'data-plane'] for type in ['stable', 'preview']]
         print(quarter, *counts, sep=',') if any(counts) else None
     last_quarter_services = this_quarter_services
