@@ -96,6 +96,8 @@ for dir in monthly_dirs:
 
 os.chdir('..')
 
+# print('\n'.join(sorted(dataplane_packages['java']['2022-06-30'])))
+
 # Help on matplotlib
 # https://matplotlib.org/stable/gallery/index.html
 
